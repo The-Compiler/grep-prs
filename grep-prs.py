@@ -1,6 +1,7 @@
 import re
 import sys
 import pathlib
+import itertools
 
 import rich.progress
 import rich.panel
@@ -9,11 +10,29 @@ import github3
 
 
 def _grep_diff(diff, pattern):
+    filename = None
+    location = None
     for line in diff:
-        if not line.startswith(('+', '-')):
+        if line.startswith('--- '):
+            filename = line
+        elif line.startswith('+++ '):
+            filename += '\n' + line
+        elif line.startswith('@@ '):
+            location = line
+        elif not line.startswith(('+', '-')):
             continue
         if pattern.search(line):
-            yield line
+            yield (filename, location, line)
+
+
+def _format_matches(matches):
+    for filename, file_group in itertools.groupby(matches, key=lambda tpl: tpl[0]):
+        yield filename
+        for position, pos_group in itertools.groupby(file_group, key=lambda tpl: tpl[1]):
+            yield position
+            for _filename, _pos, line in pos_group:
+                yield line
+            yield ''
 
 
 def _print_pr_header(console, pr):
@@ -46,7 +65,7 @@ def run(progress):
 
         if matches:
             _print_pr_header(progress.console, pr)
-            syntax = rich.syntax.Syntax('\n'.join(matches), 'diff')
+            syntax = rich.syntax.Syntax('\n'.join(_format_matches(matches)), 'diff', theme='ansi_dark')
             progress.console.print(syntax)
 
 
