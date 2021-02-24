@@ -55,10 +55,10 @@ def run(progress):
 
     pattern = re.compile(sys.argv[1])
 
-    progress.update(task, description='Grepping PRs...', total=len(prs))
+    progress.update(task, total=len(prs))
     progress.start_task(task)
     for pr in prs:
-        progress.update(task, advance=1)
+        progress.update(task, advance=1, description=f'#{pr.number}')
 
         diff = pr.patch().decode('utf-8').splitlines()
         matches = list(_grep_diff(diff, pattern))
