@@ -1,4 +1,5 @@
 import re
+import sys
 import pathlib
 import itertools
 import argparse
@@ -8,6 +9,10 @@ import rich.progress
 import rich.panel
 import rich.syntax
 import github3
+
+
+class Error(Exception):
+    pass
 
 
 @dataclasses.dataclass
@@ -124,7 +129,10 @@ def parse_args():
 def main():
     args = parse_args()
     with rich.progress.Progress() as progress:
-        run(args, progress)
+        try:
+            run(args, progress)
+        except Error as e:
+            sys.exit(str(e))
 
 
 if __name__ == "__main__":
