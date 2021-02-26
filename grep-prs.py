@@ -1,12 +1,27 @@
 import re
-import sys
 import pathlib
 import itertools
+import argparse
+import dataclasses
 
 import rich.progress
 import rich.panel
 import rich.syntax
 import github3
+
+
+@dataclasses.dataclass
+class RepoName:
+
+    """A GitHub repo like user/project."""
+
+    namespace: str
+    name: str
+
+    @classmethod
+    def parse(cls, s) -> 'RepoName':
+        namespace, name = s.split('/')
+        return cls(namespace, name)
 
 
 def _grep_diff(diff, pattern):
@@ -45,15 +60,24 @@ def _print_pr_header(console, pr):
     console.print(panel)
 
 
-def run(progress):
+def _get_token(args):
+    if args.token is not None:
+        return args.token
+
+    token_path = pathlib.Path('~/.gh_token').expanduser()
+    if not token_path.exists():
+        raise Error("No --token given and ~/.gh_token does not exist.")
+    return token_path.read_text().strip()
+
+
+def run(args, progress):
     task = progress.add_task('Getting PRs...', start=False)
 
-    token = pathlib.Path('~/.gh_token').expanduser().read_text().strip()
-    gh = github3.login(token=token)
-    repo = gh.repository('qutebrowser', 'qutebrowser')
+    gh = github3.login(token=_get_token(args))
+    repo = gh.repository(args.repository.namespace, args.repository.name)
     prs = list(repo.pull_requests(state='open'))
 
-    pattern = re.compile(sys.argv[1])
+    pattern = re.compile(args.pattern)
 
     progress.update(task, total=len(prs))
     progress.start_task(task)
@@ -69,9 +93,31 @@ def run(progress):
             progress.console.print(syntax)
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--token',
+        action='store',
+        help=(
+            'The GitHub token. If not given, it gets read from ~/.gh_token. See '
+            'https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token '
+            'for setup details.'
+        )
+    )
+    parser.add_argument(
+        'repository',
+        metavar='USER/REPO',
+        help='The repository to search in',
+        type=RepoName.parse,
+    )
+    parser.add_argument('pattern', help='The pattern to search for')
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     with rich.progress.Progress() as progress:
-        run(progress)
+        run(args, progress)
 
 if __name__ == '__main__':
     main()
