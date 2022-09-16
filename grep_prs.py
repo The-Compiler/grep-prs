@@ -6,7 +6,7 @@ import pathlib
 import itertools
 import argparse
 import dataclasses
-from typing import Iterator, Tuple
+from typing import Iterator, Iterable, Tuple
 
 import rich.progress
 import rich.panel
@@ -125,16 +125,18 @@ def run(args: argparse.Namespace, progress: rich.progress.Progress) -> None:
             diff = pr.patch().decode("utf-8", errors="replace").splitlines()
 
         if args.grep_path:
-            matches = set(_grep_diff_paths(diff, pattern))
-            formatter = sorted
+            path_matches = set(_grep_diff_paths(diff, pattern))
+            formatted: Iterable[str] = sorted(path_matches)
+            has_matches = bool(path_matches)
         else:
-            matches = list(_grep_diff(diff, pattern))
-            formatter = _format_matches
+            diff_matches = list(_grep_diff(diff, pattern))
+            formatted = _format_matches(diff_matches)
+            has_matches = bool(diff_matches)
 
-        if matches:
+        if has_matches:
             _print_pr_header(progress.console, pr)
             syntax = rich.syntax.Syntax(
-                "\n".join(formatter(matches)), "diff", theme="ansi_dark"
+                "\n".join(formatted), "diff", theme="ansi_dark"
             )
             progress.console.print(syntax)
 
