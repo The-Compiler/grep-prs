@@ -59,7 +59,6 @@ def _grep_diff_paths(diff: list[str], pattern: re.Pattern[str]) -> Iterator[str]
     """Return filename lines in the diff matching the given pattern."""
     for line in diff:
         if line.startswith("--- ") or line.startswith("+++ "):
-            path = line[4:]
             if pattern.search(line):
                 yield line
 
