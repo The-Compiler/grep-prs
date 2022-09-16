@@ -19,6 +19,7 @@ The `--token` argument should be a [personal access token](https://docs.github.c
 - Drop support for Python 3.6
 - Add official support for Python 3.10 (no code changes)
 - Also test on Python 3.11-dev
+- Handle `UnicodeDecodeError` in PR diffs gracefully
 
 ### v0.1.0
 

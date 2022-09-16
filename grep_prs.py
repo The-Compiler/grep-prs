@@ -94,7 +94,12 @@ def run(args, progress):
     for pr in prs:
         progress.update(task, advance=1, description=f"#{pr.number}")
 
-        diff = pr.patch().decode("utf-8").splitlines()
+        try:
+            diff = pr.patch().decode("utf-8").splitlines()
+        except UnicodeDecodeError as e:
+            progress.console.print(f"[bold red]#{pr.number}: {e}[/]")
+            continue
+
         matches = list(_grep_diff(diff, pattern))
 
         if matches:
