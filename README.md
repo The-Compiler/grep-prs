@@ -16,6 +16,10 @@ The `--token` argument should be a [personal access token](https://docs.github.c
 
 ### v0.2.0
 
+Features:
+
+- New `--grep-path` flag to search for paths in diffs instead of diff content.
+
 Python support:
 
 - Drop support for Python 3.6

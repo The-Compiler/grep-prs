@@ -55,6 +55,15 @@ def _grep_diff(diff: list[str], pattern: re.Pattern[str]) -> Iterator[MatchType]
             yield (filename, location, line)
 
 
+def _grep_diff_paths(diff: list[str], pattern: re.Pattern[str]) -> Iterator[str]:
+    """Return filename lines in the diff matching the given pattern."""
+    for line in diff:
+        if line.startswith("--- ") or line.startswith("+++ "):
+            path = line[4:]
+            if pattern.search(line):
+                yield line
+
+
 def _format_matches(matches: list[MatchType]) -> Iterator[str]:
     for filename, file_group in itertools.groupby(matches, key=lambda tpl: tpl[0]):
         yield filename
@@ -116,12 +125,17 @@ def run(args: argparse.Namespace, progress: rich.progress.Progress) -> None:
             progress.console.print(f"[yellow]#{pr.number}: {e}[/]")
             diff = pr.patch().decode("utf-8", errors="replace").splitlines()
 
-        matches = list(_grep_diff(diff, pattern))
+        if args.grep_path:
+            matches = set(_grep_diff_paths(diff, pattern))
+            formatter = sorted
+        else:
+            matches = list(_grep_diff(diff, pattern))
+            formatter = _format_matches
 
         if matches:
             _print_pr_header(progress.console, pr)
             syntax = rich.syntax.Syntax(
-                "\n".join(_format_matches(matches)), "diff", theme="ansi_dark"
+                "\n".join(formatter(matches)), "diff", theme="ansi_dark"
             )
             progress.console.print(syntax)
 
@@ -136,6 +150,11 @@ def parse_args() -> argparse.Namespace:
             "https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token "
             "for setup details."
         ),
+    )
+    parser.add_argument(
+        "--grep-path",
+        action="store_true",
+        help="Instead of grepping contents, show all PRs touching a path matching the pattern.",
     )
     parser.add_argument(
         "repository",
