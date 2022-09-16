@@ -113,8 +113,8 @@ def run(args: argparse.Namespace, progress: rich.progress.Progress) -> None:
         try:
             diff = pr.patch().decode("utf-8").splitlines()
         except UnicodeDecodeError as e:
-            progress.console.print(f"[bold red]#{pr.number}: {e}[/]")
-            continue
+            progress.console.print(f"[yellow]#{pr.number}: {e}[/]")
+            diff = pr.patch().decode("utf-8", errors="replace").splitlines()
 
         matches = list(_grep_diff(diff, pattern))
 
