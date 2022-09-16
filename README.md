@@ -16,10 +16,19 @@ The `--token` argument should be a [personal access token](https://docs.github.c
 
 ### v0.2.0
 
+Python support:
+
 - Drop support for Python 3.6
 - Add official support for Python 3.10 (no code changes)
 - Also test on Python 3.11-dev
+
+Bugfixes:
+
 - Handle `UnicodeDecodeError` in PR diffs gracefully
+
+Internal:
+
+- Add type annotations and mypy
 
 ### v0.1.0
 
