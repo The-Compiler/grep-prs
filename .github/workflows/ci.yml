@@ -13,17 +13,17 @@ jobs:
       matrix:
         include:
           - testenv: lint
-            python: 3.10
+            python: "3.10"
           - testenv: py311
-            python: 3.11-dev
+            python: "3.11-dev"
           - testenv: py310
-            python: 3.10
+            python: "3.10"
           - testenv: py39
-            python: 3.9
+            python: "3.9"
           - testenv: py38
-            python: 3.8
+            python: "3.8"
           - testenv: py37
-            python: 3.7
+            python: "3.7"
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
