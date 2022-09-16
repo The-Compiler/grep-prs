@@ -14,6 +14,8 @@ The `--token` argument should be a [personal access token](https://docs.github.c
 
 ## Changelog
 
+**Note: Releases aren't actually pushed to PyPI yet...**
+
 ### v0.2.0
 
 Features:
