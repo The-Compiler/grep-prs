@@ -25,6 +25,7 @@ Python support:
 Bugfixes:
 
 - Handle `UnicodeDecodeError` in PR diffs gracefully
+- Fix crash when searching for part of a filename
 
 Internal:
 

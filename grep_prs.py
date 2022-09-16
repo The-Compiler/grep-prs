@@ -48,7 +48,7 @@ def _grep_diff(diff: list[str], pattern: re.Pattern[str]) -> Iterator[MatchType]
             location = line
         elif not line.startswith(("+", "-")):
             continue
-        if pattern.search(line):
+        elif pattern.search(line):
             if filename is None or location is None:
                 print("\n".join(diff))
                 raise AssertionError(f"filename: {filename}, location: {location}")
